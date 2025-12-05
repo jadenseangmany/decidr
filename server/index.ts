@@ -19,3 +19,4 @@ app.listen(port, () => {
 });
 
 //npm start to start the server
+//http://localhost:3000/ 
