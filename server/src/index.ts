@@ -1,22 +1,21 @@
-// Import the express in typescript file
-import express from 'express';
+import express, { Request, Response } from 'express';
+import userRoutes from './routes/user-routes';
 
-// Initialize the express engine
 const app: express.Application = express();
 
-// Take a port 3000 for running server.
 const port: number = 3000;
 
-// Handling '/' Request
-app.get('/', (req, res) => {
+app.get('/', (req: Request, res: Response) => {
     res.send("TypeScript With Express");
 });
 
-// Server setup
+app.use(express.json());
+app.use('/users', userRoutes);
+
 app.listen(port, () => {
     console.log(`TypeScript with Express 
          http://localhost:${port}/`);
 });
 
 //npm start to start the server
-//http://localhost:3000/ 
+//http://localhost:3000/

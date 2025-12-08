@@ -1,0 +1,11 @@
+{
+  "editor.quickSuggestions": false,
+  "editor.suggestOnTriggerCharacters": false,
+  "editor.inlineSuggest.enabled": false,
+  "editor.parameterHints.enabled": false,
+  "editor.acceptSuggestionOnEnter": "off",
+  "javascript.suggest.enabled": false,
+  "typescript.suggest.enabled": false,
+  "javascript.validate.enable": true,
+  "typescript.validate.enable": true
+}
