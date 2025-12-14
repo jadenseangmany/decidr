@@ -4,10 +4,3 @@ HTTP Status Codes
 400 Bad Request = client sent invalid/missing data
 404 Not Found = requested user doesn’t exist
 500 Internal Server Error
-
-Persist users in a real database (SQLite/Postgres/Mongo) instead of tempUserDB, and make findUserBy... async.
-Add authentication tokens (e.g. JWT) or sessions so login actually returns something the client can use to stay logged in.
-Move secrets/config (like bcrypt salt rounds, DB URL, JWT secret) into environment variables and a config file.
-Add basic input validation with a library (e.g. zod or joi) instead of manual if (!username) checks everywhere.
-Write a couple of tests for signup/login (using something like jest + supertest) so you can safely change code later.
-Improve logging slightly (e.g. include username in logs) and add a tiny README documenting your endpoints and expected request bodies.
