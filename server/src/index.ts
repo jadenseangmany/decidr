@@ -5,11 +5,12 @@ const app: express.Application = express();
 
 const port: number = 3000;
 
+app.use(express.json());
+
 app.get('/', (req: Request, res: Response) => {
     res.send("TypeScript With Express");
 });
 
-app.use(express.json());
 app.use('/users', userRoutes);
 
 app.listen(port, () => {

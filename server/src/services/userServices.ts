@@ -15,9 +15,9 @@ export function findUserByEmail(email:string){
 }
 
 export async function createNewUser(name:string,password:string,email:string){
-  const hashedPassword = await Auth.hashPassword(password);
-  const user = new User(name,hashedPassword,email);
-  tempUserDB.push(user);
+    const hashedPassword = await Auth.hashPassword(password);
+    const user = new User(name,hashedPassword,email);
+    tempUserDB.push(user);
 }
 
 export async function logUserIn(name:string,password:string){

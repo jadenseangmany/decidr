@@ -14,7 +14,7 @@ export default router;
 //http://localhost:3000/users/Terry
 //http://localhost:3000/users/testuser
 //http://localhost:3000/users/signup
-
+//http://localhost:3000/users/login
 
 /*
 small json test for postman
