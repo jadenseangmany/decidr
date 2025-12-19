@@ -1,5 +1,25 @@
 {
   "dependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.10.1",
+    "bcrypt": "^6.0.0",
     "express": "^5.1.0"
+  },
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon --watch src --exec ts-node src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "nodemon": "^3.1.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }
