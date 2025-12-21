@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config({ path: "src/process.env" });
+
 import express, { Request, Response } from 'express';
 import userRoutes from './routes/userRoutes';
 
