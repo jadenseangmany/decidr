@@ -1,8 +1,15 @@
+<<<<<<< HEAD
 import "dotenv/config";
 
 import express, { Request, Response } from "express";
 import userRoutes from "./routes/userRoutes";
 import { getDb } from "./db/mongo";
+=======
+import dotenv from "dotenv";
+dotenv.config({ path: "src/process.env" });
+import express, { Request, Response } from 'express';
+import userRoutes from './routes/userRoutes';
+>>>>>>> e91022c (Add dotenv and JWT setup)
 
 const app: express.Application = express();
 
