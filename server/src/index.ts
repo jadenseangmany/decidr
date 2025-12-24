@@ -1,5 +1,8 @@
-import express, { Request, Response } from 'express';
-import userRoutes from './routes/userRoutes';
+import "dotenv/config";
+
+import express, { Request, Response } from "express";
+import userRoutes from "./routes/userRoutes";
+import { getDb } from "./db/mongo";
 
 const app: express.Application = express();
 
@@ -7,15 +10,23 @@ const port: number = 3000;
 
 app.use(express.json());
 
-app.get('/', (req: Request, res: Response) => {
-    res.send("TypeScript With Express");
+(async () => {
+  const db = await getDb();
+  await db.command({ ping: 1 });
+  console.log("MongoDB ready");
+})().catch((err) => {
+  console.error("MongoDB connection failed:", err);
+  process.exit(1);
 });
 
-app.use('/users', userRoutes);
+app.get("/", (req: Request, res: Response) => {
+  res.send("TypeScript With Express");
+});
+
+app.use("/users", userRoutes);
 
 app.listen(port, () => {
-    console.log(`TypeScript with Express 
-         http://localhost:${port}/`);
+  console.log(`TypeScript with Express http://localhost:${port}/`);
 });
 
 //npm start to start the server
