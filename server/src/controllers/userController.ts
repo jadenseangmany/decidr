@@ -5,7 +5,12 @@ import jwt from "jsonwebtoken";
 export function getUserInfo(req:Request, res:Response){
   const username = req.params.username;
   const user = userServices.findUserByUsername(username);
+  //make sure the req user matches
+  const { username: tokenUsername } = (req as any).user || {};
 
+  if (tokenUsername !== username) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
   if (user) {
     return res.json({
       "username": user.getUsername(),
