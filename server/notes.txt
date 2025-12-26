@@ -18,9 +18,5 @@ TOKEN=$(curl -s -X POST http://localhost:3000/users/login \
 echo "$TOKEN"
 
 # 3) Get own info (200)
-curl -i http://localhost:3000/users/testuser \
-  -H "Authorization: Bearer $TOKEN"
-
-# 4) Try another user (403)
-curl -i http://localhost:3000/users/otheruser \
+curl -i http://localhost:3000/users/me \
   -H "Authorization: Bearer $TOKEN"

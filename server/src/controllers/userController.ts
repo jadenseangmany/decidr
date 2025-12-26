@@ -3,14 +3,11 @@ import * as userServices from '../services/userServices'
 import jwt from "jsonwebtoken";
 
 export function getUserInfo(req:Request, res:Response){
-  const username = req.params.username;
-  const user = userServices.findUserByUsername(username);
-  //make sure the req user matches
-  const { username: tokenUsername } = (req as any).user || {};
-
-  if (tokenUsername !== username) {
-    return res.status(403).json({ message: "Forbidden" });
+  const username = (req as any).user?.username;
+  if (!username) {
+    return res.status(401).json({ message: "Unauthorized" });
   }
+  const user = userServices.findUserByUsername(username);
   if (user) {
     return res.json({
       "username": user.getUsername(),
@@ -86,4 +83,3 @@ export async function userLogin(req:Request, res:Response){
     return res.status(500).json({ message: "Internal server error" });
   }
 }
-
