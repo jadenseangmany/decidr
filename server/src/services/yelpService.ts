@@ -1,4 +1,6 @@
 import axios from "axios";
+import type { YelpBusiness } from "../types/yelp";
+import { sortByWeightedRating } from "../utils/algo";
 
 const YELP_URL = "https://api.yelp.com/v3/businesses/search";
 
@@ -41,5 +43,18 @@ export const searchRestaurants = async ({
     params,
   });
 
-  return response.data.businesses;
+  // Extract the businesses array from the Yelp response and assert its shape
+  // So typescript expects those fields(safer)
+  const businesses = response.data.businesses as YelpBusiness[];
+
+  // Sort businesses using a weighted rating to account for review count
+  const sortedBusinesses = sortByWeightedRating(businesses);
+
+  //preserve Yelp response shape
+  return {
+    ...response.data,
+    businesses: sortedBusinesses,
+  };
 };
+
+
