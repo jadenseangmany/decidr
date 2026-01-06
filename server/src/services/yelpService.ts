@@ -14,6 +14,7 @@ export const searchRestaurants = async ({
   miles,
   cuisine,
   price,
+  index,
 }: {
   location?: string;
   latitude?: number;
@@ -21,6 +22,7 @@ export const searchRestaurants = async ({
   miles?: number;
   cuisine?: string; // e.g. "korean,mexican"
   price?: string;   // "1", "1,2", etc
+  index: number;    // REQUIRED
 }) => {
   const params: any = {
     categories: cuisine,
@@ -43,18 +45,26 @@ export const searchRestaurants = async ({
     params,
   });
 
-  // Extract the businesses array from the Yelp response and assert its shape
-  // So typescript expects those fields(safer)
+  // Extract the businesses array from the Yelp response
   const businesses = response.data.businesses as YelpBusiness[];
 
-  // Sort businesses using a weighted rating to account for review count
+  // Sort businesses using a weighted rating
   const sortedBusinesses = sortByWeightedRating(businesses);
 
-  //preserve Yelp response shape
+  const max = sortedBusinesses.length;
+
+  if (max === 0) {
+    return {
+      ...response.data,
+      businesses: null,
+    };
+  }
+
+  // wrap index if it exceeds bounds
+  const wrappedIndex = ((index % max) + max) % max;
+
   return {
     ...response.data,
-    businesses: sortedBusinesses,
+    businesses: sortedBusinesses[wrappedIndex],
   };
 };
-
-
