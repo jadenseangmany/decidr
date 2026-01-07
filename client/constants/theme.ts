@@ -27,6 +27,12 @@ export const Colors = {
   },
 };
 
+export const AppColors = {
+  primaryGreen: '#3E6843',
+  primaryYellow: '#F6D763',
+  appBackground: '#EBE4D4'
+}
+
 export const Fonts = Platform.select({
   ios: {
     /** iOS `UIFontDescriptorSystemDesignDefault` */
