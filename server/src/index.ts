@@ -10,6 +10,8 @@ dotenv.config();
 
 const app: express.Application = express();
 
+// Reads the AWS Port variable and uses that as the port;
+// otherwise falls back to 3000
 const port: number = parseInt(process.env.PORT || "3000", 10);
 
 app.use(express.json());
