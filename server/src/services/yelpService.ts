@@ -4,8 +4,21 @@ import { sortByWeightedRating } from "../utils/algo";
 
 const YELP_URL = "https://api.yelp.com/v3/businesses/search";
 
-const milesToMeters = (miles: number) =>
-  Math.min(Math.floor(miles * 1609.34), 40000);
+const milesToMeters = (miles?: number) => {
+  if (!miles) return;
+  const meters = miles * 1609.34;
+  return Math.min(Math.floor(meters), 40000);
+};
+
+type SearchRestaurantsArgs = {
+  location?: string;
+  latitude?: number;
+  longitude?: number;
+  miles?: number;
+  cuisine?: string;
+  price?: string;
+  index: number;
+};
 
 export const searchRestaurants = async ({
   location,
@@ -15,16 +28,8 @@ export const searchRestaurants = async ({
   cuisine,
   price,
   index,
-}: {
-  location?: string;
-  latitude?: number;
-  longitude?: number;
-  miles?: number;
-  cuisine?: string; // e.g. "korean,mexican"
-  price?: string;   // "1", "1,2", etc
-  index: number;    // REQUIRED
-}) => {
-  const params: any = {
+}: SearchRestaurantsArgs) => {
+  const params: Record<string, any> = {
     categories: cuisine,
     price,
     limit: 50,
@@ -33,7 +38,11 @@ export const searchRestaurants = async ({
   if (latitude && longitude) {
     params.latitude = latitude;
     params.longitude = longitude;
-    if (miles) params.radius = milesToMeters(miles);
+
+    const radius = milesToMeters(miles);
+    if (radius) {
+      params.radius = radius;
+    }
   } else if (location) {
     params.location = location;
   }
@@ -45,26 +54,23 @@ export const searchRestaurants = async ({
     params,
   });
 
-  // Extract the businesses array from the Yelp response
   const businesses = response.data.businesses as YelpBusiness[];
-
-  // Sort businesses using a weighted rating
-  const sortedBusinesses = sortByWeightedRating(businesses);
-
-  const max = sortedBusinesses.length;
-
-  if (max === 0) {
+  if (!businesses || businesses.length === 0) {
     return {
       ...response.data,
       businesses: null,
     };
   }
 
-  // wrap index if it exceeds bounds
-  const wrappedIndex = ((index % max) + max) % max;
+  const sortedBusinesses = sortByWeightedRating(businesses);
+
+  // wrap index so callers don't need to care about bounds
+  const safeIndex =
+    ((index % sortedBusinesses.length) + sortedBusinesses.length) %
+    sortedBusinesses.length;
 
   return {
     ...response.data,
-    businesses: sortedBusinesses[wrappedIndex],
+    businesses: sortedBusinesses[safeIndex],
   };
 };
