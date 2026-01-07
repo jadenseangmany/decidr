@@ -1,12 +1,19 @@
 import { Request, Response } from 'express';
 import * as userServices from '../services/userServices'
+import { VisitedRestaurant} from '../types/restaurant';
+import jwt from "jsonwebtoken";
 
 export function getUserInfo(req:Request, res:Response){
-  const username = req.params.username;
+  const username = (req as any).user?.username;
+  if (!username) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
   const user = userServices.findUserByUsername(username);
-
   if (user) {
-    return res.json(user);
+    return res.json({
+      "username": user.getUsername(),
+      "email": user.getEmail()
+    });
   } else {
     return res.status(404).json({ message: "User not found" });
   }
@@ -62,12 +69,78 @@ export async function userLogin(req:Request, res:Response){
       return res.status(400).json({ message: "Username or Password doesn't match"});
     }
 
+    const token = jwt.sign(
+      { username: user.getUsername() },
+      process.env.JWT_SECRET!,
+      { expiresIn: "15m" }
+    );
+
     return res.status(200).json({
       message: "Login successful",
+      token
     });
   }catch(err){
     console.error("Login error",err);
     return res.status(500).json({ message: "Internal server error" });
   }
 }
+
+export async function addVisitedRestaurant(req: Request, res: Response){
+  try {
+    const username = req.params.username
+    const { restaurant_id, name, location, visited_date, rating, notes } = req.body;
+
+    if (!restaurant_id) {
+      return res.status(400).json({ message: "Please provide a restaurant_id"});
+    }
+    if (!name) {
+      return res.status(400).json({ message: "Please provide a restaurant name"});
+    }
+    if (!location) {
+       return res.status(400).json({ message: "Please provide a location"});
+    }
+    const restaurantData = {
+      restaurant_id,
+      name,
+      location,
+      visited_at: visited_date ? new Date(visited_date) : new Date(),
+      rating,
+      notes
+    };
+
+    const user = userServices.addVisitedRestaurant (username, restaurantData);
+
+    if (!user){
+      return res.status(404).json({message: "User not found"});
+    }
+
+    return res.status(200).json({
+      message: "Restaurant added successfully",
+      visited_restaurants: user.getVisitedRestaurants()
+    });
+  } catch (err) {
+    console.error("Add visited restaurant error:", err);
+    return res.status(500).json({ message: "Internal server error"})
+  }
+}
+
+
+  export function getVisitedRestaurant(req: Request, res: Response) {
+    try{
+      const username = req.params.username;
+      const user = userServices.findUserByUsername(username);
+
+      if (!user){
+      return res.status(404).json({ message: "User not found"});
+      }
+
+      return res.status(200).json({
+        visited_restaurants: user.getVisitedRestaurants()
+      });
+    } catch (err) {
+      console.error("Get visited restaurants error:", err);
+      return res.status(500).json({ message: "Internal server error"})
+    }
+  }
+
 

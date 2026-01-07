@@ -2,9 +2,9 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 
 export default function Index() {
-  const router = useRouter();
-
-  return (
+    const router = useRouter();
+    
+      return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Text>Welcome to the App!</Text>
       
@@ -21,4 +21,5 @@ export default function Index() {
       </TouchableOpacity>
     </View>
   );
+
 }

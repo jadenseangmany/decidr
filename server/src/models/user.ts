@@ -1,12 +1,16 @@
+import { VisitedRestaurant } from '../types/restaurant';
+
 class User {
   username: string;
   password: string;
   email: string;
+  visited_restaurants: VisitedRestaurant[];
 
   constructor(username: string, password: string, email: string) {
     this.username = username;
     this.password = password;
     this.email = email;
+    this.visited_restaurants = [];
   }
 
   getUsername(): string {
@@ -31,6 +35,14 @@ class User {
 
   setEmail(email: string): void {
     this.email = email;
+  }
+
+  addVisitedRestaurant(restaurant: VisitedRestaurant): void {
+    this.visited_restaurants.push(restaurant);
+  }
+
+  getVisitedRestaurants(): VisitedRestaurant[] {
+    return this.visited_restaurants;
   }
 }
 

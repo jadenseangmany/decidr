@@ -1,6 +1,7 @@
 //imports everything as a file turns it into a object
 import * as Auth from "../utils/auth";
 import User from '../models/user';
+import { VisitedRestaurant} from '../types/restaurant';
 
 const tempUserDB = [
   new User("Terry", "somerandomhashedpassword", "terryguan@gmail.com")
@@ -31,4 +32,15 @@ export async function logUserIn(name:string,password:string){
     return undefined;
   }
   return user;
+}
+
+export function addVisitedRestaurant (username: string, restaurantData: VisitedRestaurant) {
+  const user = findUserByUsername(username);
+  if (!user){
+    return undefined;
+  }
+
+  user.addVisitedRestaurant(restaurantData);
+  return user;
+
 }
