@@ -3,6 +3,10 @@ import "dotenv/config";
 import express, { Request, Response } from "express";
 import userRoutes from "./routes/userRoutes";
 import { getDb } from "./db/mongo";
+import dotenv from "dotenv";
+import yelpRoutes from "./routes/yelpRoutes";
+
+dotenv.config();
 
 const app: express.Application = express();
 
@@ -24,6 +28,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/users", userRoutes);
+app.use("/api/yelp", yelpRoutes);
 
 app.listen(port, () => {
   console.log(`TypeScript with Express http://localhost:${port}/`);
