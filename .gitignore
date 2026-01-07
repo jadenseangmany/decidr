@@ -5,3 +5,5 @@ client/.expo
 client/assets/fonts/*.pdf
 client/assets/fonts/*.otf
 client/assets/fonts/*.jpg
+server/.env
+client/.env
