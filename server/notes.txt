@@ -4,3 +4,19 @@ HTTP Status Codes
 400 Bad Request = client sent invalid/missing data
 404 Not Found = requested user doesn’t exist
 500 Internal Server Error
+
+# 1) Signup
+curl -i -X POST http://localhost:3000/users/signup \
+  -H "Content-Type: application/json" \
+  -d '{"username":"testuser","password":"password123","email":"test@example.com"}'
+
+# 2) Login and capture token
+TOKEN=$(curl -s -X POST http://localhost:3000/users/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"testuser","password":"password123"}' \
+  | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')
+echo "$TOKEN"
+
+# 3) Get own info (200)
+curl -i http://localhost:3000/users/me \
+  -H "Authorization: Bearer $TOKEN"

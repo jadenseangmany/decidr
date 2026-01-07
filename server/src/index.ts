@@ -3,10 +3,16 @@ import "dotenv/config";
 import express, { Request, Response } from "express";
 import userRoutes from "./routes/userRoutes";
 import { getDb } from "./db/mongo";
+import dotenv from "dotenv";
+import yelpRoutes from "./routes/yelpRoutes";
+
+dotenv.config();
 
 const app: express.Application = express();
 
-const port: number = 3000;
+// Reads the AWS Port variable and uses that as the port;
+// otherwise falls back to 3000
+const port: number = parseInt(process.env.PORT || "3000", 10);
 
 app.use(express.json());
 
@@ -24,6 +30,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/users", userRoutes);
+app.use("/api/yelp", yelpRoutes);
 
 app.listen(port, () => {
   console.log(`TypeScript with Express http://localhost:${port}/`);
