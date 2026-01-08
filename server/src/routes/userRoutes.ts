@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import * as userController from '../controllers/userController';
-import {requireAuth} from '../middleware/requireAuth';
+import { requireAuth } from '../middleware/requireAuth';
 const router = express.Router();
 
 router.get('/me', requireAuth, userController.getUserInfo);
@@ -12,7 +12,11 @@ router.post('/login', userController.userLogin);
 router.post('/:username/visited-restaurants', userController.addVisitedRestaurant);
 
 router.get('/:username/visited-restaurants', userController.getVisitedRestaurant);
-  
+
+router.post('/:username/saved-restaurants', userController.addSavedRestaurant);
+
+router.get('/:username/saved-restaurants', userController.getSavedRestaurant);
+
 export default router;
 
 //http://localhost:3000/users/Terry

@@ -145,3 +145,55 @@ export async function getVisitedRestaurant(req: Request, res: Response) {
     return res.status(500).json({ message: "Internal server error" });
   }
 }
+
+export async function addSavedRestaurant(req: Request, res: Response) {
+  try {
+    const username = req.params.username;
+    const { restaurant_id, name, location, rating, image_url, cuisine } = req.body;
+
+    if (!restaurant_id) {
+      return res.status(400).json({ message: "Please provide a restaurant_id" });
+    }
+    if (!name) {
+      return res.status(400).json({ message: "Please provide a restaurant name" });
+    }
+
+    const restaurantData = {
+      restaurant_id,
+      name,
+      location: location || '',
+      visited_at: new Date(),
+      rating,
+      image_url,
+      cuisine
+    };
+
+    const user = await userServices.addSavedRestaurant(username, restaurantData);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      message: "Restaurant saved successfully",
+      saved_restaurants: user.saved_restaurants
+    });
+  } catch (err) {
+    console.error("Add saved restaurant error:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export async function getSavedRestaurant(req: Request, res: Response) {
+  try {
+    const username = req.params.username;
+    const restaurants = await userServices.getSavedRestaurants(username);
+
+    return res.status(200).json({
+      saved_restaurants: restaurants
+    });
+  } catch (err) {
+    console.error("Get saved restaurants error:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}

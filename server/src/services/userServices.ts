@@ -5,12 +5,16 @@ import { getDb } from "../db/mongo";
 // MongoDB collection name for users
 const USERS_COLLECTION = "users";
 
+// SavedRestaurant uses same structure as VisitedRestaurant
+export type SavedRestaurant = VisitedRestaurant;
+
 // User document interface for MongoDB
 interface UserDocument {
   username: string;
   password: string;
   email: string;
   visited_restaurants: VisitedRestaurant[];
+  saved_restaurants: SavedRestaurant[];
   createdAt: Date;
 }
 
@@ -35,6 +39,7 @@ export async function createNewUser(name: string, password: string, email: strin
     password: hashedPassword,
     email: email,
     visited_restaurants: [],
+    saved_restaurants: [],
     createdAt: new Date(),
   };
 
@@ -73,4 +78,24 @@ export async function getVisitedRestaurants(username: string): Promise<VisitedRe
     return [];
   }
   return user.visited_restaurants || [];
+}
+
+export async function addSavedRestaurant(username: string, restaurantData: SavedRestaurant): Promise<UserDocument | null> {
+  const db = await getDb();
+
+  const result = await db.collection<UserDocument>(USERS_COLLECTION).findOneAndUpdate(
+    { username: username },
+    { $push: { saved_restaurants: restaurantData } },
+    { returnDocument: "after" }
+  );
+
+  return result;
+}
+
+export async function getSavedRestaurants(username: string): Promise<SavedRestaurant[]> {
+  const user = await findUserByUsername(username);
+  if (!user) {
+    return [];
+  }
+  return user.saved_restaurants || [];
 }
