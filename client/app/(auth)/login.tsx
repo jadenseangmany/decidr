@@ -15,22 +15,25 @@ import { useRouter } from "expo-router";
 import { COLORS } from "@/constants/colors";
 import AuthTextField from "@/components/AuthTextField";
 import PrimaryButton from "@/components/PrimaryButton";
+import { API_BASE_URL } from "@/constants/api";
 
-// ---- Mock API call (for showing purpose only) ----
-async function fakeLoginApi(username: string, password: string) {
-  await new Promise((res) => setTimeout(res, 900));
+// ---- Real API call to backend ----
+async function loginApi(username: string, password: string) {
+  const response = await fetch(`${API_BASE_URL}/users/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ username, password }),
+  });
 
-  if (!username.trim() || !password) {
-    throw new Error("Please enter both username and password.");
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Login failed");
   }
-  if (password.length < 4) {
-    throw new Error("Password is too short (demo error).");
-  }
 
-  return {
-    token: "demo_token_123",
-    user: { username },
-  };
+  return data;
 }
 
 export default function LoginScreen() {
@@ -52,12 +55,15 @@ export default function LoginScreen() {
     setLoading(true);
 
     try {
-      const result = await fakeLoginApi(username, password);
+      const result = await loginApi(username, password);
 
       console.log("LOGIN SUCCESS", {
         result,
         rememberMe,
       });
+
+      // Navigate to RecommenderScreen after successful login
+      router.replace("/RecommenderScreen");
     } catch (err: any) {
       setErrorMsg(err?.message ?? "Something went wrong. Please try again.");
     } finally {
