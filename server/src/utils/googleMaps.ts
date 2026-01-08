@@ -23,6 +23,10 @@ export const getDrivingTime = async (
         return null;
     }
 
+    console.log("[Google Maps] Calling Distance Matrix API...");
+    console.log("[Google Maps] Origin:", origin);
+    console.log("[Google Maps] Destination:", destination);
+
     try {
         const response = await axios.get(DISTANCE_MATRIX_URL, {
             params: {
@@ -34,13 +38,18 @@ export const getDrivingTime = async (
             },
         });
 
+        console.log("[Google Maps] Response status:", response.data?.status);
+        console.log("[Google Maps] Full response:", JSON.stringify(response.data, null, 2));
+
         const element = response.data?.rows?.[0]?.elements?.[0];
 
         if (element?.status === "OK" && element?.duration?.value) {
-            // duration.value is in seconds, convert to minutes
-            return Math.round(element.duration.value / 60);
+            const minutes = Math.round(element.duration.value / 60);
+            console.log("[Google Maps] Driving time:", minutes, "minutes");
+            return minutes;
         }
 
+        console.warn("[Google Maps] No valid duration in response. Element:", element);
         return null;
     } catch (error) {
         console.error("Google Maps API error:", error);
