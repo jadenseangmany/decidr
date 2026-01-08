@@ -80,6 +80,17 @@ export async function getVisitedRestaurants(username: string): Promise<VisitedRe
   return user.visited_restaurants || [];
 }
 
+export async function clearVisitedRestaurants(username: string): Promise<boolean> {
+  const db = await getDb();
+
+  const result = await db.collection<UserDocument>(USERS_COLLECTION).updateOne(
+    { username: username },
+    { $set: { visited_restaurants: [] } }
+  );
+
+  return result.modifiedCount > 0;
+}
+
 export async function addSavedRestaurant(username: string, restaurantData: SavedRestaurant): Promise<UserDocument | null> {
   const db = await getDb();
 

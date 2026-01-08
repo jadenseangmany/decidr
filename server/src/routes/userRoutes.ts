@@ -13,6 +13,8 @@ router.post('/:username/visited-restaurants', userController.addVisitedRestauran
 
 router.get('/:username/visited-restaurants', userController.getVisitedRestaurant);
 
+router.delete('/:username/visited-restaurants', userController.clearVisitedRestaurants);
+
 router.post('/:username/saved-restaurants', userController.addSavedRestaurant);
 
 router.get('/:username/saved-restaurants', userController.getSavedRestaurant);

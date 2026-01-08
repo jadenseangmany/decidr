@@ -146,6 +146,22 @@ export async function getVisitedRestaurant(req: Request, res: Response) {
   }
 }
 
+export async function clearVisitedRestaurants(req: Request, res: Response) {
+  try {
+    const username = req.params.username;
+    const success = await userServices.clearVisitedRestaurants(username);
+
+    if (success) {
+      return res.status(200).json({ message: "History cleared successfully" });
+    } else {
+      return res.status(404).json({ message: "User not found" });
+    }
+  } catch (err) {
+    console.error("Clear visited restaurants error:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 export async function addSavedRestaurant(req: Request, res: Response) {
   try {
     const username = req.params.username;
