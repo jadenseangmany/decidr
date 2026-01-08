@@ -63,7 +63,7 @@ export default function LoginScreen() {
       });
 
       // Navigate to RecommenderScreen after successful login
-      router.replace("/RecommenderScreen");
+      router.replace("/homescreen");
     } catch (err: any) {
       setErrorMsg(err?.message ?? "Something went wrong. Please try again.");
     } finally {
