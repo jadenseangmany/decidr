@@ -15,31 +15,32 @@ import { useRouter } from "expo-router";
 import { COLORS } from "@/constants/colors";
 import AuthTextField from "@/components/AuthTextField";
 import PrimaryButton from "@/components/PrimaryButton";
+import { API_BASE_URL } from "@/constants/api";
 
-// ---- Mock API call (for showing purpose only) ----
-async function fakeSignupApi(username: string, password: string, confirmPassword: string) {
-  await new Promise((res) => setTimeout(res, 900));
+// ---- Real API call to backend ----
+async function signupApi(username: string, email: string, password: string) {
+  const response = await fetch(`${API_BASE_URL}/users/signup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ username, email, password }),
+  });
 
-  if (!username.trim() || !password || !confirmPassword) {
-    throw new Error("Please fill in all fields.");
-  }
-  if (password.length < 4) {
-    throw new Error("Password is too short (demo error).");
-  }
-  if (password !== confirmPassword) {
-    throw new Error("Passwords do not match.");
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Signup failed");
   }
 
-  return {
-    token: "demo_signup_token_456",
-    user: { username },
-  };
+  return data;
 }
 
 export default function SignupScreen() {
   const router = useRouter();
 
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -50,18 +51,25 @@ export default function SignupScreen() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const canSubmit = useMemo(() => {
-    return username.trim().length > 0 && password.length > 0 && confirmPassword.length > 0 && !loading;
-  }, [username, password, confirmPassword, loading]);
+    return username.trim().length > 0 && email.trim().length > 0 && password.length > 0 && confirmPassword.length > 0 && !loading;
+  }, [username, email, password, confirmPassword, loading]);
 
   const onSignup = async () => {
     setErrorMsg(null);
+
+    // Client-side validation
+    if (password !== confirmPassword) {
+      setErrorMsg("Passwords do not match.");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const result = await fakeSignupApi(username, password, confirmPassword);
+      const result = await signupApi(username, email, password);
       console.log("SIGNUP SUCCESS", result);
 
-      // For demo: go to login after signup
+      // Navigate to login after successful signup
       router.replace("/(auth)/login");
     } catch (err: any) {
       setErrorMsg(err?.message ?? "Something went wrong. Please try again.");
@@ -92,6 +100,13 @@ export default function SignupScreen() {
         />
 
         <AuthTextField
+          value={email}
+          onChangeText={setEmail}
+          placeholder="Type your email here..."
+          iconName="mail-outline"
+        />
+
+        <AuthTextField
           value={password}
           onChangeText={setPassword}
           placeholder="Type your password here..."
@@ -114,12 +129,6 @@ export default function SignupScreen() {
         {errorMsg ? <Text style={styles.error}>{errorMsg}</Text> : null}
 
         <PrimaryButton title="Sign up" onPress={onSignup} disabled={!canSubmit} loading={loading} />
-
-        {/* "Sign up with" button (display/demo only) */}
-        <Pressable onPress={onSignupWithEmail} style={styles.secondaryBtn} disabled={loading}>
-          <Text style={styles.secondaryText}>Sign up with</Text>
-          <Ionicons name="mail" size={20} color="#000" />
-        </Pressable>
 
         <View style={styles.bottomRow}>
           <Text style={styles.bottomText}>Already have an account? </Text>

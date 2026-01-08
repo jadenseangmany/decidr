@@ -10,6 +10,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 import { COLORS } from "@/constants/colors";
 import AuthTextField from "@/components/AuthTextField";
@@ -33,6 +34,7 @@ async function fakeLoginApi(username: string, password: string) {
 }
 
 export default function LoginScreen() {
+  const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -123,10 +125,10 @@ export default function LoginScreen() {
           rightImage={require("../../assets/login/hambuger.png")}
         />
 
-        {/* Sign up (display only) */}
+        {/* Sign up */}
         <View style={styles.signupRow}>
           <Text style={styles.signupText}>Don’t Have An Account? </Text>
-          <Pressable onPress={() => console.log("Sign up (demo)")}>
+          <Pressable onPress={() => router.push("/(auth)/signup")}>
             <Text style={styles.signupLink}>Sign up Here</Text>
           </Pressable>
         </View>

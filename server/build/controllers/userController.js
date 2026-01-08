@@ -53,23 +53,30 @@ exports.getVisitedRestaurant = getVisitedRestaurant;
 const userServices = __importStar(require("../services/userServices"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 function getUserInfo(req, res) {
-    var _a;
-    const username = (_a = req.user) === null || _a === void 0 ? void 0 : _a.username;
-    if (!username) {
-        return res.status(401).json({ message: "Unauthorized" });
-    }
-    const user = userServices.findUserByUsername(username);
-    if (user) {
-        return res.json({
-            "username": user.getUsername(),
-            "email": user.getEmail()
-        });
-    }
-    else {
-        return res.status(404).json({ message: "User not found" });
-    }
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        try {
+            const username = (_a = req.user) === null || _a === void 0 ? void 0 : _a.username;
+            if (!username) {
+                return res.status(401).json({ message: "Unauthorized" });
+            }
+            const user = yield userServices.findUserByUsername(username);
+            if (user) {
+                return res.json({
+                    username: user.username,
+                    email: user.email
+                });
+            }
+            else {
+                return res.status(404).json({ message: "User not found" });
+            }
+        }
+        catch (err) {
+            console.error("Get user info error:", err);
+            return res.status(500).json({ message: "Internal server error" });
+        }
+    });
 }
-//for async functions its good to have some error handling
 function userSignup(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -83,11 +90,12 @@ function userSignup(req, res) {
             if (!email) {
                 return res.status(400).json({ message: "Please provide an email" });
             }
-            const user = userServices.findUserByUsername(username);
-            if (user) {
+            const existingUser = yield userServices.findUserByUsername(username);
+            if (existingUser) {
                 return res.status(400).json({ message: "Username is already taken, try again" });
             }
-            if (userServices.findUserByEmail(email)) {
+            const existingEmail = yield userServices.findUserByEmail(email);
+            if (existingEmail) {
                 return res.status(400).json({ message: "There's already an account associated with this email" });
             }
             yield userServices.createNewUser(username, password, email);
@@ -112,7 +120,7 @@ function userLogin(req, res) {
             if (!user) {
                 return res.status(400).json({ message: "Username or Password doesn't match" });
             }
-            const token = jsonwebtoken_1.default.sign({ username: user.getUsername() }, process.env.JWT_SECRET, { expiresIn: "15m" });
+            const token = jsonwebtoken_1.default.sign({ username: user.username }, process.env.JWT_SECRET, { expiresIn: "15m" });
             return res.status(200).json({
                 message: "Login successful",
                 token
@@ -146,13 +154,13 @@ function addVisitedRestaurant(req, res) {
                 rating,
                 notes
             };
-            const user = userServices.addVisitedRestaurant(username, restaurantData);
+            const user = yield userServices.addVisitedRestaurant(username, restaurantData);
             if (!user) {
                 return res.status(404).json({ message: "User not found" });
             }
             return res.status(200).json({
                 message: "Restaurant added successfully",
-                visited_restaurants: user.getVisitedRestaurants()
+                visited_restaurants: user.visited_restaurants
             });
         }
         catch (err) {
@@ -162,18 +170,17 @@ function addVisitedRestaurant(req, res) {
     });
 }
 function getVisitedRestaurant(req, res) {
-    try {
-        const username = req.params.username;
-        const user = userServices.findUserByUsername(username);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const username = req.params.username;
+            const restaurants = yield userServices.getVisitedRestaurants(username);
+            return res.status(200).json({
+                visited_restaurants: restaurants
+            });
         }
-        return res.status(200).json({
-            visited_restaurants: user.getVisitedRestaurants()
-        });
-    }
-    catch (err) {
-        console.error("Get visited restaurants error:", err);
-        return res.status(500).json({ message: "Internal server error" });
-    }
+        catch (err) {
+            console.error("Get visited restaurants error:", err);
+            return res.status(500).json({ message: "Internal server error" });
+        }
+    });
 }

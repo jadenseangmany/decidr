@@ -20,6 +20,8 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const yelpRoutes_1 = __importDefault(require("./routes/yelpRoutes"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
+// Reads the AWS Port variable and uses that as the port;
+// otherwise falls back to 3000
 const port = parseInt(process.env.PORT || "3000", 10);
 app.use(express_1.default.json());
 (() => __awaiter(void 0, void 0, void 0, function* () {

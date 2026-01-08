@@ -41,52 +41,71 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.findUserByUsername = findUserByUsername;
 exports.findUserByEmail = findUserByEmail;
 exports.createNewUser = createNewUser;
 exports.logUserIn = logUserIn;
 exports.addVisitedRestaurant = addVisitedRestaurant;
-//imports everything as a file turns it into a object
+exports.getVisitedRestaurants = getVisitedRestaurants;
 const Auth = __importStar(require("../utils/auth"));
-const user_1 = __importDefault(require("../models/user"));
-const tempUserDB = [
-    new user_1.default("Terry", "somerandomhashedpassword", "terryguan@gmail.com")
-];
+const mongo_1 = require("../db/mongo");
+// MongoDB collection name for users
+const USERS_COLLECTION = "users";
 function findUserByUsername(name) {
-    return tempUserDB.find(u => u.username == name);
+    return __awaiter(this, void 0, void 0, function* () {
+        const db = yield (0, mongo_1.getDb)();
+        const user = yield db.collection(USERS_COLLECTION).findOne({ username: name });
+        return user;
+    });
 }
 function findUserByEmail(email) {
-    return tempUserDB.find(u => u.email == email);
+    return __awaiter(this, void 0, void 0, function* () {
+        const db = yield (0, mongo_1.getDb)();
+        const user = yield db.collection(USERS_COLLECTION).findOne({ email: email });
+        return user;
+    });
 }
 function createNewUser(name, password, email) {
     return __awaiter(this, void 0, void 0, function* () {
+        const db = yield (0, mongo_1.getDb)();
         const hashedPassword = yield Auth.hashPassword(password);
-        const user = new user_1.default(name, hashedPassword, email);
-        tempUserDB.push(user);
+        const newUser = {
+            username: name,
+            password: hashedPassword,
+            email: email,
+            visited_restaurants: [],
+            createdAt: new Date(),
+        };
+        yield db.collection(USERS_COLLECTION).insertOne(newUser);
     });
 }
 function logUserIn(name, password) {
     return __awaiter(this, void 0, void 0, function* () {
-        const user = findUserByUsername(name);
+        const user = yield findUserByUsername(name);
         if (!user) {
-            return undefined;
+            return null;
         }
-        const passwordMatch = yield Auth.verifyPassword(password, user.getPassword());
+        const passwordMatch = yield Auth.verifyPassword(password, user.password);
         if (!passwordMatch) {
-            return undefined;
+            return null;
         }
         return user;
     });
 }
 function addVisitedRestaurant(username, restaurantData) {
-    const user = findUserByUsername(username);
-    if (!user) {
-        return undefined;
-    }
-    user.addVisitedRestaurant(restaurantData);
-    return user;
+    return __awaiter(this, void 0, void 0, function* () {
+        const db = yield (0, mongo_1.getDb)();
+        const result = yield db.collection(USERS_COLLECTION).findOneAndUpdate({ username: username }, { $push: { visited_restaurants: restaurantData } }, { returnDocument: "after" });
+        return result;
+    });
+}
+function getVisitedRestaurants(username) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const user = yield findUserByUsername(username);
+        if (!user) {
+            return [];
+        }
+        return user.visited_restaurants || [];
+    });
 }
