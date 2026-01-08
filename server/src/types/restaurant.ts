@@ -5,4 +5,6 @@ export interface VisitedRestaurant {
     visited_at: Date;
     rating?: number;
     notes?: string;
+    image_url?: string;
+    cuisine?: string;
 }

@@ -93,7 +93,7 @@ export async function userLogin(req: Request, res: Response) {
 export async function addVisitedRestaurant(req: Request, res: Response) {
   try {
     const username = req.params.username;
-    const { restaurant_id, name, location, visited_date, rating, notes } = req.body;
+    const { restaurant_id, name, location, visited_date, rating, notes, image_url, cuisine } = req.body;
 
     if (!restaurant_id) {
       return res.status(400).json({ message: "Please provide a restaurant_id" });
@@ -111,7 +111,9 @@ export async function addVisitedRestaurant(req: Request, res: Response) {
       location,
       visited_at: visited_date ? new Date(visited_date) : new Date(),
       rating,
-      notes
+      notes,
+      image_url,
+      cuisine
     };
 
     const user = await userServices.addVisitedRestaurant(username, restaurantData);
