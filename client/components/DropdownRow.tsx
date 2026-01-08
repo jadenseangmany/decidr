@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     maxWidth: 200,
     alignItems: "center",
   },
-  valueText: { fontWeight: "bold", color: COLORS.textDark, flex: 1 },
+  valueText: { fontWeight: "bold", color: COLORS.textDark, flex: 1, textAlign: "center" },
   arrow: { fontSize: 12, color: COLORS.textDark },
 
   modalOverlay: {

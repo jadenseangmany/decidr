@@ -9,10 +9,14 @@ import {
     Dimensions,
     Alert,
     ScrollView,
+    Share,
 } from "react-native";
+import { FontAwesome6 } from "@expo/vector-icons";
 import { COLORS } from "../constants/theme";
+import { getUsername } from "../utils/auth";
+import { API_BASE_URL } from "../constants/api";
 
-// Restaurant type from Yelp API
+// Restaurant type from Yelp API (enriched with recommendation data)
 export interface Restaurant {
     id: string;
     name: string;
@@ -37,6 +41,12 @@ export interface Restaurant {
     business_hours?: Array<{
         is_open_now?: boolean;
     }>;
+    coordinates?: {
+        latitude: number;
+        longitude: number;
+    };
+    // Computed by backend (from Google Maps)
+    driving_time_minutes?: number;
 }
 
 interface RestaurantCardProps {
@@ -88,6 +98,59 @@ export default function RestaurantCard({
 
     const hasDescription = !!restaurant.attributes?.about_this_biz_history;
 
+    // Use driving time from backend (Google Maps API)
+
+    const handleSave = async () => {
+        try {
+            const username = await getUsername();
+            if (!username) {
+                Alert.alert("Not Logged In", "Please log in to save restaurants.");
+                return;
+            }
+
+            const locationStr = restaurant.location?.city
+                ? `${restaurant.location.address1 || ''}, ${restaurant.location.city}`
+                : restaurant.location?.display_address?.join(', ') || '';
+
+            const cuisineStr = restaurant.categories?.[0]?.title || '';
+
+            const response = await fetch(`${API_BASE_URL}/users/${username}/saved-restaurants`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    restaurant_id: restaurant.id,
+                    name: restaurant.name,
+                    location: locationStr,
+                    rating: restaurant.rating,
+                    image_url: restaurant.image_url,
+                    cuisine: cuisineStr,
+                }),
+            });
+
+            if (response.ok) {
+                Alert.alert("Saved!", `${restaurant.name} has been saved to your list.`);
+            } else {
+                Alert.alert("Error", "Failed to save restaurant.");
+            }
+        } catch (error) {
+            console.error("Failed to save restaurant:", error);
+            Alert.alert("Error", "Failed to save restaurant.");
+        }
+    };
+
+    const handleShare = async () => {
+        try {
+            await Share.share({
+                message: `Check out ${restaurant.name} on Yelp!`,
+                url: restaurant.url || `https://www.yelp.com/biz/${restaurant.id}`,
+            });
+        } catch (error) {
+            console.error("Error sharing:", error);
+        }
+    };
+
     return (
         <Modal
             visible={visible}
@@ -97,6 +160,16 @@ export default function RestaurantCard({
         >
             <View style={styles.overlay}>
                 <View style={[styles.card, hasDescription && styles.cardWithDescription]}>
+                    {/* Top Left Icons - Share & Save */}
+                    <View style={styles.topLeftIcons}>
+                        <TouchableOpacity style={styles.iconButton} onPress={handleShare}>
+                            <FontAwesome6 name="arrow-up-from-bracket" size={18} color="#333" />
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.iconButton} onPress={handleSave}>
+                            <FontAwesome6 name="bookmark" size={18} color="#333" />
+                        </TouchableOpacity>
+                    </View>
+
                     {/* Close Button */}
                     <TouchableOpacity style={styles.closeButton} onPress={onClose}>
                         <Text style={styles.closeButtonText}>✕</Text>
@@ -188,7 +261,12 @@ export default function RestaurantCard({
                             style={styles.selectButton}
                             onPress={() => onSelect(restaurant)}
                         >
-                            <Text style={styles.buttonText}>Select</Text>
+                            <View style={styles.selectButtonContent}>
+                                <FontAwesome6 name="car" size={16} color="#FFF" />
+                                <Text style={styles.buttonText}>
+                                    {restaurant.driving_time_minutes ? `${restaurant.driving_time_minutes} min` : "Go"}
+                                </Text>
+                            </View>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -216,6 +294,19 @@ const styles = StyleSheet.create({
     },
     cardWithDescription: {
         height: SCREEN_HEIGHT * 0.6,
+    },
+    topLeftIcons: {
+        position: "absolute",
+        top: 15,
+        left: 15,
+        zIndex: 10,
+        flexDirection: "row",
+        gap: 8,
+    },
+    iconButton: {
+        backgroundColor: "rgba(255,255,255,0.8)",
+        borderRadius: 15,
+        padding: 8,
     },
     closeButton: {
         position: "absolute",
@@ -304,6 +395,11 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         borderRadius: 25,
         alignItems: "center",
+    },
+    selectButtonContent: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
     },
     buttonText: {
         color: "#FFF",

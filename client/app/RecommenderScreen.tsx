@@ -8,16 +8,17 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 import FilterRow from "../components/FilterRow";
 import DropdownRow from "../components/DropdownRow";
+import LocationMap from "../components/LocationMap";
 import RestaurantCard, { Restaurant } from "../components/RestaurantCard";
 import { COLORS } from "../constants/theme";
 import { PriceCategory } from "@/models/recommender";
 import { API_BASE_URL } from "@/constants/api";
+import { getUsername } from "@/utils/auth";
 
 // Map price category to Yelp price format (1-4)
 const priceCategoryToYelp: Record<PriceCategory, string> = {
@@ -95,6 +96,40 @@ export default function RecommenderScreen() {
     }
   }, [radius, userLocation]);
 
+  // Save restaurant to user's history
+  const saveRestaurantToHistory = async (restaurantData: Restaurant) => {
+    try {
+      const username = await getUsername();
+      if (!username) {
+        console.log("No username found, skipping history save");
+        return;
+      }
+
+      const locationStr = restaurantData.location?.city
+        ? `${restaurantData.location.address1 || ''}, ${restaurantData.location.city}`
+        : restaurantData.location?.display_address?.join(', ') || '';
+
+      const cuisineStr = restaurantData.categories?.[0]?.title || '';
+
+      await fetch(`${API_BASE_URL}/users/${username}/visited-restaurants`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          restaurant_id: restaurantData.id,
+          name: restaurantData.name,
+          location: locationStr,
+          rating: restaurantData.rating,
+          image_url: restaurantData.image_url,
+          cuisine: cuisineStr,
+        }),
+      });
+    } catch (error) {
+      console.error("Failed to save restaurant to history:", error);
+    }
+  };
+
   const handleGenerate = async () => {
     if (!userLocation) {
       Alert.alert("Location Required", "Please enable location access.");
@@ -134,6 +169,10 @@ export default function RecommenderScreen() {
         setShowCard(true);
         // Increment index for next generation to get different result
         setResultIndex((prev) => prev + 1);
+
+        // Save to user's restaurant history
+        const restaurantData = data.businesses as Restaurant;
+        saveRestaurantToHistory(restaurantData);
       } else {
         Alert.alert("No Results", "No restaurants found with your criteria. Try adjusting filters.");
       }
@@ -160,37 +199,11 @@ export default function RecommenderScreen() {
             onValueChange={setRadius}
           />
 
-          <View style={styles.mapContainer}>
-            <MapView
-              provider={PROVIDER_GOOGLE}
-              style={styles.map}
-              region={region}
-              onRegionChangeComplete={setRegion}
-              showsUserLocation={true}
-              showsMyLocationButton={true}
-            >
-              {userLocation && (
-                <Marker
-                  coordinate={{
-                    latitude: userLocation.latitude,
-                    longitude: userLocation.longitude,
-                  }}
-                  title="You are here"
-                  pinColor="red"
-                />
-              )}
-              {restaurant && restaurant.location && (
-                <Marker
-                  coordinate={{
-                    latitude: region.latitude + 0.005,
-                    longitude: region.longitude + 0.005,
-                  }}
-                  title={restaurant.name}
-                  pinColor="green"
-                />
-              )}
-            </MapView>
-          </View>
+          <LocationMap
+            region={region}
+            onRegionChange={setRegion}
+            userLocation={userLocation}
+          />
 
           <DropdownRow
             label="Price"
@@ -254,18 +267,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     fontFamily: "serif",
     color: "#000",
-  },
-  mapContainer: {
-    height: 280,
-    borderRadius: 20,
-    overflow: "hidden",
-    borderWidth: 2,
-    borderColor: "#FFF",
-    marginVertical: 10,
-  },
-  map: {
-    width: "100%",
-    height: "100%",
   },
   button: {
     backgroundColor: COLORS.highlightOrange,

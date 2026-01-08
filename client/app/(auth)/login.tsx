@@ -16,6 +16,7 @@ import { COLORS } from "@/constants/colors";
 import AuthTextField from "@/components/AuthTextField";
 import PrimaryButton from "@/components/PrimaryButton";
 import { API_BASE_URL } from "@/constants/api";
+import { saveAuth } from "@/utils/auth";
 
 // ---- Real API call to backend ----
 async function loginApi(username: string, password: string) {
@@ -57,12 +58,15 @@ export default function LoginScreen() {
     try {
       const result = await loginApi(username, password);
 
+      // Save auth data to secure storage
+      await saveAuth(username, result.token);
+
       console.log("LOGIN SUCCESS", {
         result,
         rememberMe,
       });
 
-      // Navigate to RecommenderScreen after successful login
+      // Navigate to homescreen after successful login
       router.replace("/homescreen");
     } catch (err: any) {
       setErrorMsg(err?.message ?? "Something went wrong. Please try again.");
