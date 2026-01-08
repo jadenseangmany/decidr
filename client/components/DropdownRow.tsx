@@ -60,7 +60,7 @@ export default function DropdownRow({
         <Text style={styles.arrow}>▼</Text>
       </TouchableOpacity>
 
-      <Modal visible={visible} transparent animationType="slide">
+      <Modal visible={visible} transparent animationType="fade">
         <TouchableOpacity
           style={styles.modalOverlay}
           onPress={() => setVisible(false)}

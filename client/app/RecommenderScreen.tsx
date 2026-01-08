@@ -38,9 +38,9 @@ const cuisineToYelp: Record<string, string> = {
 export default function RecommenderScreen() {
   const [radius, setRadius] = useState(5);
   const [priceCategory, setPriceCategory] = useState<
-    PriceCategory | "------------------------"
-  >("------------------------");
-  const [cuisine, setCuisine] = useState("------------------------");
+    PriceCategory | "Surprise me!"
+  >("Surprise me!");
+  const [cuisine, setCuisine] = useState("Surprise me!");
   const [resultIndex, setResultIndex] = useState(0);
 
   const priceOptions: PriceCategory[] = [
@@ -114,10 +114,10 @@ export default function RecommenderScreen() {
       });
 
       // Add optional filters
-      if (priceCategory !== "------------------------") {
+      if (priceCategory !== "Surprise me!") {
         params.append("priceLimit", priceCategoryToYelp[priceCategory as PriceCategory]);
       }
-      if (cuisine !== "------------------------") {
+      if (cuisine !== "Surprise me!") {
         params.append("cuisine", cuisineToYelp[cuisine] || cuisine.toLowerCase());
       }
 

@@ -181,7 +181,7 @@ export default function RestaurantCard({
                             style={styles.tryAnotherButton}
                             onPress={onTryAnother}
                         >
-                            <Text style={styles.buttonText}>Try Another</Text>
+                            <Text style={styles.buttonText}>Reroll</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -288,19 +288,19 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         gap: 15,
-        padding: 20,
-        paddingTop: 0,
+        padding: 15,
+        paddingTop: 15,
     },
     tryAnotherButton: {
         flex: 1,
-        backgroundColor: COLORS.main,
+        backgroundColor: COLORS.highlightOrange,
         paddingVertical: 12,
         borderRadius: 25,
         alignItems: "center",
     },
     selectButton: {
         flex: 1,
-        backgroundColor: COLORS.highlightOrange,
+        backgroundColor: COLORS.main,
         paddingVertical: 12,
         borderRadius: 25,
         alignItems: "center",
