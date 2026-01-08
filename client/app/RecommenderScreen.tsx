@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
@@ -13,8 +14,26 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 import FilterRow from "../components/FilterRow";
 import DropdownRow from "../components/DropdownRow";
+import RestaurantCard, { Restaurant } from "../components/RestaurantCard";
 import { COLORS } from "../constants/theme";
 import { PriceCategory } from "@/models/recommender";
+import { API_BASE_URL } from "@/constants/api";
+
+// Map price category to Yelp price format (1-4)
+const priceCategoryToYelp: Record<PriceCategory, string> = {
+  "Cheap": "1",
+  "Moderate": "2",
+  "Expensive": "3",
+  "Very Expensive": "4",
+};
+
+// Map cuisine to Yelp categories
+const cuisineToYelp: Record<string, string> = {
+  "Italian": "italian",
+  "Mexican": "mexican",
+  "Japanese": "japanese",
+  "Fast Food": "hotdogs,burgers,sandwiches",
+};
 
 export default function RecommenderScreen() {
   const [radius, setRadius] = useState(5);
@@ -22,6 +41,7 @@ export default function RecommenderScreen() {
     PriceCategory | "------------------------"
   >("------------------------");
   const [cuisine, setCuisine] = useState("------------------------");
+  const [resultIndex, setResultIndex] = useState(0);
 
   const priceOptions: PriceCategory[] = [
     "Cheap",
@@ -29,8 +49,12 @@ export default function RecommenderScreen() {
     "Expensive",
     "Very Expensive",
   ];
-  const cuisineOptions = ["Italian", "Mexican", "Japanese", "Fast Food"]; // placeholder
+  const cuisineOptions = ["Italian", "Mexican", "Japanese", "Fast Food"];
+
   const [userLocation, setUserLocation] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const [showCard, setShowCard] = useState(false);
 
   // default if location not found
   const [region, setRegion] = useState({
@@ -71,8 +95,53 @@ export default function RecommenderScreen() {
     }
   }, [radius, userLocation]);
 
-  const handleGenerate = () => {
-    console.log("Generating with:", { radius, price: priceCategory, cuisine });
+  const handleGenerate = async () => {
+    if (!userLocation) {
+      Alert.alert("Location Required", "Please enable location access.");
+      return;
+    }
+
+    setLoading(true);
+    setRestaurant(null);
+
+    try {
+      // Build query params
+      const params = new URLSearchParams({
+        lat: userLocation.latitude.toString(),
+        lng: userLocation.longitude.toString(),
+        miles: radius.toString(),
+        index: resultIndex.toString(),
+      });
+
+      // Add optional filters
+      if (priceCategory !== "------------------------") {
+        params.append("priceLimit", priceCategoryToYelp[priceCategory as PriceCategory]);
+      }
+      if (cuisine !== "------------------------") {
+        params.append("cuisine", cuisineToYelp[cuisine] || cuisine.toLowerCase());
+      }
+
+      const url = `${API_BASE_URL}/api/yelp/restaurants?${params}`;
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to get recommendations");
+      }
+
+      if (data.businesses) {
+        setRestaurant(data.businesses);
+        setShowCard(true);
+        // Increment index for next generation to get different result
+        setResultIndex((prev) => prev + 1);
+      } else {
+        Alert.alert("No Results", "No restaurants found with your criteria. Try adjusting filters.");
+      }
+    } catch (err: any) {
+      Alert.alert("Error", err.message || "Failed to generate recommendation");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -110,6 +179,16 @@ export default function RecommenderScreen() {
                   pinColor="red"
                 />
               )}
+              {restaurant && restaurant.location && (
+                <Marker
+                  coordinate={{
+                    latitude: region.latitude + 0.005,
+                    longitude: region.longitude + 0.005,
+                  }}
+                  title={restaurant.name}
+                  pinColor="green"
+                />
+              )}
             </MapView>
           </View>
 
@@ -127,10 +206,33 @@ export default function RecommenderScreen() {
             onSelect={(val) => setCuisine(val)}
           />
 
-          <TouchableOpacity style={styles.button} onPress={handleGenerate}>
-            <Text style={styles.buttonText}>Generate!</Text>
+          <TouchableOpacity
+            style={[styles.button, loading && styles.buttonDisabled]}
+            onPress={handleGenerate}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color={COLORS.textLight} />
+            ) : (
+              <Text style={styles.buttonText}>Generate!</Text>
+            )}
           </TouchableOpacity>
         </ScrollView>
+
+        {/* Restaurant Card Modal */}
+        <RestaurantCard
+          restaurant={restaurant}
+          visible={showCard}
+          onClose={() => setShowCard(false)}
+          onTryAnother={() => {
+            setShowCard(false);
+            handleGenerate();
+          }}
+          onSelect={(r) => {
+            setShowCard(false);
+            Alert.alert("Selected!", `You chose ${r.name}`);
+          }}
+        />
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -146,7 +248,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   title: {
-    fontSize: 50,
+    fontSize: 40,
     fontWeight: "900",
     textAlign: "center",
     marginBottom: 20,
@@ -165,34 +267,21 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-  cuisineRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 15,
-  },
-  labelOval: {
-    backgroundColor: COLORS.main,
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 25,
-  },
-  labelText: { color: "#FFF", fontWeight: "bold" },
-  dropdownPlaceholder: {
-    flex: 1,
-    backgroundColor: COLORS.highlightYellow,
-    marginLeft: 15,
-    padding: 12,
-    borderRadius: 25,
-    alignItems: "center",
-  },
   button: {
     backgroundColor: COLORS.highlightOrange,
-    paddingVertical: 8,
+    paddingVertical: 12,
     width: 200,
     borderRadius: 35,
-    marginTop: 100,
-    margin: "auto",
+    marginTop: 30,
+    alignSelf: "center",
     alignItems: "center",
   },
-  buttonText: { color: COLORS.textLight, fontSize: 20, fontWeight: "bold" },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  buttonText: {
+    color: COLORS.textLight,
+    fontSize: 20,
+    fontWeight: "bold"
+  },
 });

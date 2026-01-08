@@ -81,7 +81,7 @@ export default function LoginScreen() {
         <Image source={require("../../assets/login/soymilk.png")} style={styles.soy} />
         <Image source={require("../../assets/login/grill.png")} style={styles.grill} />
 
-        <Text style={styles.title}>App Name</Text>
+        <Text style={styles.title}>Decidr</Text>
 
         <AuthTextField
           value={username}
