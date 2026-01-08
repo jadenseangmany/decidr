@@ -1,6 +1,8 @@
 import axios from "axios";
 import type { YelpBusiness } from "../types/yelp";
+import type { RestaurantRecommendation } from "../types/recommendation";
 import { sortByWeightedRating } from "../utils/algo";
+import { getDrivingTime } from "../utils/googleMaps";
 
 const YELP_URL = "https://api.yelp.com/v3/businesses/search";
 
@@ -69,8 +71,27 @@ export const searchRestaurants = async ({
     ((index % sortedBusinesses.length) + sortedBusinesses.length) %
     sortedBusinesses.length;
 
+  const selectedBusiness = sortedBusinesses[safeIndex];
+
+  // Enrich with driving time if user location is available
+  let recommendation: RestaurantRecommendation = { ...selectedBusiness };
+
+  if (latitude && longitude && selectedBusiness.coordinates) {
+    const drivingTime = await getDrivingTime(
+      { latitude, longitude },
+      {
+        latitude: selectedBusiness.coordinates.latitude,
+        longitude: selectedBusiness.coordinates.longitude,
+      }
+    );
+
+    if (drivingTime !== null) {
+      recommendation.driving_time_minutes = drivingTime;
+    }
+  }
+
   return {
     ...response.data,
-    businesses: sortedBusinesses[safeIndex],
+    businesses: recommendation,
   };
 };
