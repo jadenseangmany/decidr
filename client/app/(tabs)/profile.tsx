@@ -1,8 +1,7 @@
-import { ScrollView, StyleSheet, View, Image, Pressable } from 'react-native'
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import {AppColors } from '@/constants/theme'
+import { ScrollView, StyleSheet, View, Image, Pressable, Text } from 'react-native'
+import { Ionicons } from '@expo/vector-icons';
+import { AppColors } from '@/constants/theme'
+import { useRouter } from 'expo-router';
 
 
 const mockRestaurants = [
@@ -10,7 +9,7 @@ const mockRestaurants = [
         restaurant_id: '1',
         name: "In n out",
         cuisine: "Italian",
-        location: "LA, CA",
+        location: "La J, CA",
         dateVisited: '2026-01-05',
         rating: 4,
         image: require('@/assets/images/in-n-out.jpg')
@@ -24,6 +23,7 @@ const mockRestaurants = [
         rating: 5,
         image: require('@/assets/images/cfa.webp')
     },
+    
     {
         restaurant_id: '3',
         name: "Chipotle",
@@ -38,16 +38,24 @@ const mockRestaurants = [
 
 
 export default function ProfileScreen() {
+    const router = useRouter();
+    
     return (
         <ScrollView style = {styles.container}>
             {/* Header & App name */}
             <View style={styles.header}>
-                <Pressable style={styles.headerButton}>
-                    <IconSymbol name = "gearshape.fill" size={40} color='#000' />
+                <Pressable style={({ pressed }) => [styles.headerButton, pressed && {transform:[{ scale: 0.8 }] }]} 
+                    onPress={() => console.log('Settings pressed')}>
+                    <Ionicons name="settings" size={40} color='#000' />
                 </Pressable>
-                <ThemedText style={styles.appName}>Decidr</ThemedText>
-                <Pressable style={styles.headerButton}>
-                    <IconSymbol name="house.fill" size={40} color='#000'/>
+                
+                <Pressable style={({ pressed }) => [pressed && {transform:[{scale:0.95 }] }]}
+                    onPress={() => console.log('Decidr pressed')}>
+                    <Text style={styles.appName}>Decidr</Text>
+                </Pressable>
+                <Pressable style={({ pressed }) => [styles.headerButton,pressed && { transform:[{ scale: 0.9 }]} ]} 
+                    onPress={() => console.log('Home pressed')}>
+                    <Ionicons name="home" size={40} color='#000'/>
                 </Pressable>
             </View>
             {/* Profile Section */}
@@ -59,12 +67,12 @@ export default function ProfileScreen() {
                     />
                 </Pressable>
                 <View style={styles.usernameBorder} >
-                    <ThemedText style={styles.username}>sandramescad0</ThemedText>
+                    <Text style={styles.username}>sandramescad0</Text>
                 </View>
             </View>
             {/* Restaurant History Section */}
-            <View style={styles.restaurantHeader}>  
-                <ThemedText style={styles.restaurantText}>Restaurant History</ThemedText>
+            <View style={styles.restaurantHeader}>
+                <Text style={styles.restaurantText}>Restaurant History</Text>
             </View>
             <View style={styles.restaurantContainer}>
                 {mockRestaurants.map((restaurant) => (
@@ -78,12 +86,12 @@ export default function ProfileScreen() {
                         {/* Restaurant Info */}
                         <View style={styles.restaurantInfo}>
                             <View style={styles.restaurantNameContainer}>
-                                <ThemedText style={styles.restaurantName}>{restaurant.name}</ThemedText>
+                                <Text style={styles.restaurantName}>{restaurant.name}</Text>
                             </View>
-                            <ThemedText style={styles.restaurantDetail}>🍴 {restaurant.cuisine}</ThemedText>
-                            <ThemedText style={styles.restaurantDetail}>📍 {restaurant.location}</ThemedText>   
-                            <ThemedText style={styles.restaurantDetail}>📅 {new Date(restaurant.dateVisited).toLocaleDateString()}</ThemedText>
-                            <ThemedText style={styles.restaurantRating}>👍 {'⭐'.repeat(Math.floor(restaurant.rating))}</ThemedText>
+                            <Text style={styles.restaurantDetail}>🍴 {restaurant.cuisine}</Text>
+                            <Text style={styles.restaurantDetail}>📍 {restaurant.location}</Text>
+                            <Text style={styles.restaurantDetail}>📅 {new Date(restaurant.dateVisited).toLocaleDateString()}</Text>
+                            <Text style={styles.restaurantRating}>👍 {'⭐'.repeat(Math.floor(restaurant.rating))}</Text>
                         </View>
                     </View>
                 ))}
@@ -100,11 +108,11 @@ const styles = StyleSheet.create({
     header:{
         backgroundColor: AppColors.primaryGreen,
         flexDirection: 'row',
-        justifyContent: 'space-evenly',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 15,
+        paddingHorizontal: 0,
         paddingVertical: 0,
-        paddingTop:15,
+        paddingTop: 10,
         shadowColor: "#333",
         shadowOffset: {width:0, height: 3},
         shadowOpacity: 0.7,
@@ -112,26 +120,27 @@ const styles = StyleSheet.create({
     },
     headerButton: {
         padding: 10,
-        marginTop: 15,
+       // marginTop: 2,
         width: 55,
         shadowColor: "#333",
         shadowOffset: {width:2, height: 3},
         shadowOpacity: 0.7,
         shadowRadius: 3,
-        
+        marginHorizontal: 20,
     },
     appName: {
         flex:1,
         textAlign: 'center',
-        marginTop: 40,
+        marginTop: 0,
         paddingVertical:20,
-        fontSize: 40,
+        fontSize: 50,
         fontWeight: 'bold',
         color: '#fff',
         shadowColor: "#333",
-        shadowOffset: {width:0, height: 3},
+        shadowOffset: {width:0, height: 4},
         shadowOpacity: 0.7,
         shadowRadius: 3,
+        fontFamily: 'KetchupManis'
     },
 
     profile: {
@@ -152,11 +161,14 @@ const styles = StyleSheet.create({
         borderColor: AppColors.primaryYellow,
         marginBottom: 20,
         overflow:"hidden",
+       
+        
     },
     profileImage:{
         width: 110,
         height: 115,
-        borderRadius: 50
+        borderRadius: 50,
+        overflow:"hidden",
     },
     usernameBorder:{
         borderWidth: 2,
@@ -164,6 +176,7 @@ const styles = StyleSheet.create({
         width: 200,
         alignItems: 'center',
         paddingHorizontal:12,
+        paddingVertical:4,
         borderColor: AppColors.primaryYellow,
         backgroundColor: AppColors.appBackground,
         shadowColor: "#333",
@@ -173,23 +186,26 @@ const styles = StyleSheet.create({
     },
     username:{
         fontSize: 15,
-        fontWeight: 'bold',
+        //fontWeight: 'bold',
         alignItems: 'center',
+        fontFamily: 'Quicksand',
+        fontWeight: '600' 
     },
     restaurantHeader: {
         marginLeft: 25,
-        marginTop: 40,
+        marginTop: 50,
         flexWrap: 'wrap',
     },
     restaurantText: {
-        fontSize: 20,
+        fontSize: 24,
+        fontFamily: 'KetchupManis',
         fontWeight: 'bold',
         borderBottomWidth:2,
         borderBottomColor: '#000',
         paddingBottom: 2,
         shadowColor: "#333",
         shadowOffset: {width:0, height: 3},
-        shadowOpacity: 0.5,
+        shadowOpacity: 0.25,
         shadowRadius: 3,
     },
     restaurantContainer:{
@@ -242,21 +258,23 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-start',      
     },
     restaurantName:{
-        fontSize: 15,
-        fontWeight: 'bold',
+        fontSize: 17,
+        fontFamily:'KetchupManis',
+        color:"#1F1F1F",
         borderBottomWidth: 1.5,
-        borderBottomColor: '#000',
-        marginBottom: 4,
+        borderBottomColor: '#1F1F1F',
+        marginBottom: 6,
        // paddingBottom:4,
        
     },
     restaurantDetail:{
-        fontSize: 12,
+        fontSize: 14,
+        fontFamily:'QuickSand',
         fontWeight: '600',
-        marginBottom:2,
+        marginBottom:6,
     },
     restaurantRating:{
-       fontSize:12,
+       fontSize:14,
        fontWeight: '600',
     },  
 })
