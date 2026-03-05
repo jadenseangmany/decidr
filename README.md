@@ -10,8 +10,6 @@ Decidr is a mobile app that solves the age-old group dilemma — *"Where do you 
 
 Decidr uses your current location to find nearby restaurants and surfaces the **best possible option** based on our custom weighted algorithm. If you're not feeling the first pick, just **reroll** for another great choice.
 
-No subscriptions. No sign-ups. Just decisions.
-
 ---
 
 ## ⚙️ How It Works
