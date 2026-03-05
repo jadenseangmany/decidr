@@ -83,7 +83,7 @@ Stay tuned!
 
 ## 👥 Contributors
 
-Built with ❤️ by a team of 6:
+Built originally as UCSD's ACM Hack Project Team 3 by:
 
 - [Jaden Seangmany](https://github.com/jadenseangmany)
 - [Khang Nguyen](https://github.com/khanggn)
