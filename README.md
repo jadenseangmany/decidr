@@ -85,15 +85,13 @@ Stay tuned!
 
 Built with ❤️ by a team of 6:
 
-- [@jadenseangmany](https://github.com/jadenseangmany)
-- [@tsitu0](https://github.com/tsitu0)
-- [@christxnele](https://github.com/christxnele)
-- [@hlam8](https://github.com/hlam8)
-- [@katelnyli](https://github.com/katelnyli)
-- [@khanggn](https://github.com/khanggn)
+- [Jaden Seangmany](https://github.com/jadenseangmany)
+- [Khang Nguyen](https://github.com/khanggn)
+- [Tom Situ](https://github.com/tsitu0)
+- [Sarthak Kapoor](https://github.com/sarthak3232)
+- [Christine Le](https://github.com/christxnele)
+- [Hoang Lam](https://github.com/hlam8)
+- [Katelyn Li](https://github.com/katelnyli)
 
----
 
-## 🔗 Links
 
-- **GitHub:** [github.com/jadenseangmany/decidr](https://github.com/jadenseangmany/decidr)
